@@ -33,6 +33,25 @@ This command will likely need sandbox disabled since target URLs are arbitrary.
 - `--selector <CSS>`: CSS selector to screenshot a specific element
 - `--full-page`: Capture the full scrollable page (ignored when --selector is used)
 - `--out-dir <PATH>`: Override output directory (default: ~/Desktop/claude-screenshot/)
+- `--name <NAME>`: Custom filename (without .png extension)
+- `--headless`: Run headless (default is visible browser to bypass Cloudflare)
+- `--scroll-to <PX>`: Scroll to Y position before capturing
+- `--wait <MS>`: Extra delay in ms after page load for JS-rendered content
+
+## Built-in behaviors
+
+- Auto-dismisses cookie banners, consent modals, and overlays before capturing
+- Rejects captures < 2KB (broken renders, favicons)
+- Visible browser by default (bypasses Cloudflare)
+
+## Quality rules
+
+1. **Only capture the visual artifact** — the rendered component, pattern, or design. Never capture blog articles, GitHub repos, gallery landing pages, or pages *about* the thing.
+2. **After every capture, Read the image to verify.** If it shows a 404, Cloudflare challenge, article, or anything other than the intended visual — delete it and try a different source.
+3. **Use --selector to narrow to the content area.** Don't capture full pages with navbars, sidebars, and ads.
+4. **Use --scroll-to when content is below the fold.**
+5. **Prefer direct demo URLs** over collection pages. Good: deployed demos, CodePen embeds. Bad: blog posts, GitHub repos, npm pages.
+6. **Don't pad count with junk.** 5 great captures beat 10 where 7 are useless.
 
 ## After running
 
