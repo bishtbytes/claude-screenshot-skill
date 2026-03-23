@@ -1,0 +1,25 @@
+{
+  "name": "bishtbytes-skills",
+  "owner": {
+    "name": "bishtbytes",
+    "url": "https://github.com/bishtbytes"
+  },
+  "metadata": {
+    "description": "Claude Code plugins by bishtbytes",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "claude-screenshot-skill",
+      "source": ".",
+      "description": "Take screenshots of any web page using Playwright. Capture full pages, viewports, or specific elements by CSS selector.",
+      "version": "1.0.0",
+      "author": { "name": "bishtbytes" },
+      "homepage": "https://github.com/bishtbytes/claude-screenshot-skill",
+      "repository": "https://github.com/bishtbytes/claude-screenshot-skill",
+      "license": "MIT",
+      "keywords": ["screenshot", "playwright", "browser", "web-capture", "visual"],
+      "category": "development"
+    }
+  ]
+}

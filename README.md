@@ -4,9 +4,10 @@ A Claude Code plugin that captures screenshots of any web page using Playwright.
 
 ## Install
 
-### As a Claude Code plugin
+### Via marketplace (recommended)
 
 ```
+/plugin marketplace add bishtbytes/claude-screenshot-skill
 /plugin install claude-screenshot-skill
 ```
 
