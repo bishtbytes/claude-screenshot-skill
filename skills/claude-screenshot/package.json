@@ -1,0 +1,7 @@
+{
+  "name": "claude-screenshot-deps",
+  "private": true,
+  "dependencies": {
+    "playwright": "^1.52.0"
+  }
+}

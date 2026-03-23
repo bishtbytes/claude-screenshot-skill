@@ -1,0 +1,21 @@
+{
+  "name": "claude-screenshot",
+  "version": "1.0.0",
+  "description": "Take screenshots of any web page using Playwright. Capture full pages, viewports, or specific elements by CSS selector.",
+  "author": {
+    "name": "bishtbytes",
+    "url": "https://github.com/bishtbytes"
+  },
+  "homepage": "https://github.com/bishtbytes/claude-screenshot",
+  "repository": "https://github.com/bishtbytes/claude-screenshot",
+  "license": "MIT",
+  "keywords": [
+    "claude-skill",
+    "claude-code",
+    "screenshot",
+    "playwright",
+    "browser",
+    "web-capture",
+    "visual"
+  ]
+}
