@@ -1,5 +1,5 @@
 ---
-name: claude-screenshot-skill
+name: capture
 description: Take a screenshot of any URL, optionally targeting a specific CSS selector. Use when user says "screenshot", "capture page", "show me what this looks like", or needs to see a website visually.
 ---
 
@@ -10,13 +10,13 @@ Take a screenshot of a web page using Playwright and save it to `~/Desktop/claud
 Run setup once to install dependencies (Playwright + Chromium):
 
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/skills/claude-screenshot-skill/setup.sh
+bash ${CLAUDE_PLUGIN_ROOT}/skills/capture/setup.sh
 ```
 
 ## How to run
 
 ```bash
-NODE_PATH="${CLAUDE_PLUGIN_DATA}/node_modules" node ${CLAUDE_PLUGIN_ROOT}/skills/claude-screenshot-skill/screenshot.mjs <URL> [--selector <CSS_SELECTOR>] [--full-page] [--out-dir <PATH>]
+NODE_PATH="${CLAUDE_PLUGIN_DATA}/node_modules" node ${CLAUDE_PLUGIN_ROOT}/skills/capture/screenshot.mjs <URL> [--selector <CSS_SELECTOR>] [--full-page] [--out-dir <PATH>]
 ```
 
 If `CLAUDE_PLUGIN_DATA` is not set (standalone install), run from the skill directory:
@@ -42,15 +42,15 @@ The script prints the absolute path to the saved PNG on stdout. Use the Read too
 
 Full viewport:
 ```bash
-NODE_PATH="${CLAUDE_PLUGIN_DATA}/node_modules" node ${CLAUDE_PLUGIN_ROOT}/skills/claude-screenshot-skill/screenshot.mjs https://example.com
+NODE_PATH="${CLAUDE_PLUGIN_DATA}/node_modules" node ${CLAUDE_PLUGIN_ROOT}/skills/capture/screenshot.mjs https://example.com
 ```
 
 Full scrollable page:
 ```bash
-NODE_PATH="${CLAUDE_PLUGIN_DATA}/node_modules" node ${CLAUDE_PLUGIN_ROOT}/skills/claude-screenshot-skill/screenshot.mjs https://example.com --full-page
+NODE_PATH="${CLAUDE_PLUGIN_DATA}/node_modules" node ${CLAUDE_PLUGIN_ROOT}/skills/capture/screenshot.mjs https://example.com --full-page
 ```
 
 Specific element:
 ```bash
-NODE_PATH="${CLAUDE_PLUGIN_DATA}/node_modules" node ${CLAUDE_PLUGIN_ROOT}/skills/claude-screenshot-skill/screenshot.mjs https://codepen.io/pen/abc123 --selector ".result"
+NODE_PATH="${CLAUDE_PLUGIN_DATA}/node_modules" node ${CLAUDE_PLUGIN_ROOT}/skills/capture/screenshot.mjs https://codepen.io/pen/abc123 --selector ".result"
 ```

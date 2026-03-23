@@ -15,7 +15,7 @@ A Claude Code plugin that captures screenshots of any web page using Playwright.
 
 ```bash
 git clone https://github.com/bishtbytes/claude-screenshot-skill.git ~/.claude/skills/claude-screenshot-skill
-cd ~/.claude/skills/claude-screenshot-skill/skills/claude-screenshot-skill
+cd ~/.claude/skills/claude-screenshot-skill/skills/capture
 bash setup.sh
 ```
 
@@ -34,7 +34,7 @@ Once installed, just ask Claude:
 - "Screenshot this page and show me the hero section"
 - "Capture the full page of https://codepen.io/pen/abc123"
 
-Or invoke directly with `/claude-screenshot-skill`.
+Or invoke directly with `/claude-screenshot-skill:capture`.
 
 ## Options
 
