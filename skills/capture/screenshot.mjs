@@ -3,24 +3,27 @@
 import { chromium } from "playwright";
 import path from "path";
 import fs from "fs";
-import { fileURLToPath } from "url";
 
 const args = process.argv.slice(2);
 const url = args[0];
 
 if (!url) {
-  console.error("Usage: screenshot.mjs <url> [--selector <css>] [--full-page] [--out-dir <path>]");
+  console.error("Usage: screenshot.mjs <url> [--selector <css>] [--full-page] [--out-dir <path>] [--headless] [--name <name>]");
   process.exit(1);
 }
 
 const selectorIdx = args.indexOf("--selector");
 const selector = selectorIdx !== -1 ? args[selectorIdx + 1] : null;
 const fullPage = args.includes("--full-page");
+const headless = args.includes("--headless");
 
 const outDirIdx = args.indexOf("--out-dir");
 const outDir = outDirIdx !== -1
   ? args[outDirIdx + 1]
   : path.join(process.env.HOME, "Desktop", "claude-screenshot");
+
+const nameIdx = args.indexOf("--name");
+const customName = nameIdx !== -1 ? args[nameIdx + 1] : null;
 
 fs.mkdirSync(outDir, { recursive: true });
 
@@ -29,19 +32,21 @@ const timestamp = new Date()
   .toISOString()
   .replace(/[:.]/g, "-")
   .slice(0, 19);
-const filename = `${hostname}-${timestamp}.png`;
+const filename = customName
+  ? `${customName}.png`
+  : `${hostname}-${timestamp}.png`;
 const outPath = path.join(outDir, filename);
 
 async function main() {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({ headless });
   const page = await browser.newPage({
-    viewport: { width: 1280, height: 800 },
+    viewport: { width: 1280, height: 720 },
   });
 
-  await page.goto(url, { waitUntil: "networkidle" });
+  await page.goto(url, { waitUntil: "networkidle", timeout: 30000 });
 
   if (selector) {
-    const el = await page.waitForSelector(selector, { timeout: 10000 });
+    const el = await page.waitForSelector(selector, { timeout: 15000 });
     if (!el) {
       console.error(`Selector "${selector}" not found`);
       await browser.close();
@@ -53,6 +58,14 @@ async function main() {
   }
 
   await browser.close();
+
+  const stat = fs.statSync(outPath);
+  if (stat.size < 2048) {
+    fs.unlinkSync(outPath);
+    console.error(`Capture too small (${stat.size} bytes) — likely a favicon or broken render. Deleted.`);
+    process.exit(1);
+  }
+
   console.log(outPath);
 }
 
