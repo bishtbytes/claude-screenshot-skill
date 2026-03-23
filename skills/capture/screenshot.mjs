@@ -8,7 +8,7 @@ const args = process.argv.slice(2);
 const url = args[0];
 
 if (!url) {
-  console.error("Usage: screenshot.mjs <url> [--selector <css>] [--full-page] [--out-dir <path>] [--headless] [--name <name>]");
+  console.error("Usage: screenshot.mjs <url> [--selector <css>] [--full-page] [--out-dir <path>] [--headless] [--name <name>] [--scroll-to <px>] [--wait <ms>]");
   process.exit(1);
 }
 
@@ -25,6 +25,12 @@ const outDir = outDirIdx !== -1
 const nameIdx = args.indexOf("--name");
 const customName = nameIdx !== -1 ? args[nameIdx + 1] : null;
 
+const scrollToIdx = args.indexOf("--scroll-to");
+const scrollTo = scrollToIdx !== -1 ? parseInt(args[scrollToIdx + 1], 10) : 0;
+
+const waitIdx = args.indexOf("--wait");
+const extraWait = waitIdx !== -1 ? parseInt(args[waitIdx + 1], 10) : 0;
+
 fs.mkdirSync(outDir, { recursive: true });
 
 const hostname = new URL(url).hostname.replace(/\./g, "-");
@@ -37,6 +43,41 @@ const filename = customName
   : `${hostname}-${timestamp}.png`;
 const outPath = path.join(outDir, filename);
 
+// Common popup/overlay selectors to auto-dismiss
+const POPUP_SELECTORS = [
+  '[class*="cookie"] button',
+  '[class*="Cookie"] button',
+  '[id*="cookie"] button',
+  '[class*="consent"] button',
+  '[class*="banner"] button[class*="close"]',
+  '[class*="modal"] button[class*="close"]',
+  '[class*="popup"] button[class*="close"]',
+  '[class*="overlay"] button[class*="close"]',
+  'button[aria-label="Close"]',
+  'button[aria-label="close"]',
+  'button[aria-label="Dismiss"]',
+  'button[aria-label="Accept"]',
+  '[class*="gdpr"] button',
+  '.fc-button-label',
+];
+
+async function dismissPopups(page) {
+  for (const sel of POPUP_SELECTORS) {
+    try {
+      const btn = await page.$(sel);
+      if (btn && await btn.isVisible()) {
+        await btn.click();
+        await page.waitForTimeout(300);
+      }
+    } catch {}
+  }
+  // Press Escape as a fallback
+  try {
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(200);
+  } catch {}
+}
+
 async function main() {
   const browser = await chromium.launch({ headless });
   const page = await browser.newPage({
@@ -44,6 +85,20 @@ async function main() {
   });
 
   await page.goto(url, { waitUntil: "networkidle", timeout: 30000 });
+
+  // Always dismiss popups
+  await dismissPopups(page);
+
+  // Scroll if requested
+  if (scrollTo > 0) {
+    await page.evaluate((y) => window.scrollTo(0, y), scrollTo);
+    await page.waitForTimeout(500);
+  }
+
+  // Extra wait for JS-rendered content
+  if (extraWait > 0) {
+    await page.waitForTimeout(extraWait);
+  }
 
   if (selector) {
     const el = await page.waitForSelector(selector, { timeout: 15000 });
