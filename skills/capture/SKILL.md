@@ -37,6 +37,25 @@ This command will likely need sandbox disabled since target URLs are arbitrary.
 - `--headless`: Run headless (default is visible browser to bypass Cloudflare)
 - `--scroll-to <PX>`: Scroll to Y position before capturing
 - `--wait <MS>`: Extra delay in ms after page load for JS-rendered content
+- `--interact <JSON>`: JSON array of interaction steps to perform before capturing
+
+## Interaction steps
+
+The `--interact` flag accepts a JSON array of steps. Each step has an `action` field:
+
+| Action    | Fields                          | Example                                                  |
+|-----------|---------------------------------|----------------------------------------------------------|
+| `click`   | `selector`                      | `{"action":"click","selector":"button:text('Submit')"}`  |
+| `fill`    | `selector`, `value`             | `{"action":"fill","selector":"#email","value":"a@b.com"}`|
+| `select`  | `selector`, `value`             | `{"action":"select","selector":"select","value":"video"}`|
+| `type`    | `selector`, `text`              | `{"action":"type","selector":"#search","text":"hello"}`  |
+| `press`   | `key`                           | `{"action":"press","key":"Enter"}`                       |
+| `wait`    | `ms`                            | `{"action":"wait","ms":2000}`                            |
+| `hover`   | `selector`                      | `{"action":"hover","selector":".menu"}`                  |
+| `check`   | `selector`                      | `{"action":"check","selector":"#agree"}`                 |
+| `uncheck` | `selector`                      | `{"action":"uncheck","selector":"#agree"}`               |
+
+Steps run in order with a 300ms pause between each (except `wait` which uses its own `ms` value). Interactions run after popup dismissal and before scroll/wait/capture.
 
 ## Built-in behaviors
 
@@ -72,4 +91,9 @@ NODE_PATH="${CLAUDE_PLUGIN_DATA}/node_modules" node ${CLAUDE_PLUGIN_ROOT}/skills
 Specific element:
 ```bash
 NODE_PATH="${CLAUDE_PLUGIN_DATA}/node_modules" node ${CLAUDE_PLUGIN_ROOT}/skills/capture/screenshot.mjs https://codepen.io/pen/abc123 --selector ".result"
+```
+
+With interactions (select dropdown, click submit, wait for render):
+```bash
+NODE_PATH="${CLAUDE_PLUGIN_DATA}/node_modules" node ${CLAUDE_PLUGIN_ROOT}/skills/capture/screenshot.mjs http://localhost:3000 --headless --interact '[{"action":"select","selector":"select","value":"video"},{"action":"click","selector":"button:text(\"Submit\")"},{"action":"wait","ms":3000}]'
 ```

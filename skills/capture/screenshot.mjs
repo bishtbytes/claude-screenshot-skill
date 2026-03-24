@@ -8,7 +8,7 @@ const args = process.argv.slice(2);
 const url = args[0];
 
 if (!url) {
-  console.error("Usage: screenshot.mjs <url> [--selector <css>] [--full-page] [--out-dir <path>] [--headless] [--name <name>] [--scroll-to <px>] [--wait <ms>]");
+  console.error("Usage: screenshot.mjs <url> [--selector <css>] [--full-page] [--out-dir <path>] [--headless] [--name <name>] [--scroll-to <px>] [--wait <ms>] [--interact <json>]");
   process.exit(1);
 }
 
@@ -30,6 +30,9 @@ const scrollTo = scrollToIdx !== -1 ? parseInt(args[scrollToIdx + 1], 10) : 0;
 
 const waitIdx = args.indexOf("--wait");
 const extraWait = waitIdx !== -1 ? parseInt(args[waitIdx + 1], 10) : 0;
+
+const interactIdx = args.indexOf("--interact");
+const interactJson = interactIdx !== -1 ? args[interactIdx + 1] : null;
 
 fs.mkdirSync(outDir, { recursive: true });
 
@@ -78,6 +81,61 @@ async function dismissPopups(page) {
   } catch {}
 }
 
+/**
+ * Run a sequence of page interactions before capturing.
+ * Each step is an object with an "action" field and action-specific params.
+ *
+ * Supported actions:
+ *   click    — { action: "click", selector: "button.submit" }
+ *   fill     — { action: "fill", selector: "#email", value: "a@b.com" }
+ *   select   — { action: "select", selector: "select.type", value: "video" }
+ *   type     — { action: "type", selector: "#search", text: "hello" }
+ *   press    — { action: "press", key: "Enter" }
+ *   wait     — { action: "wait", ms: 2000 }
+ *   hover    — { action: "hover", selector: ".menu" }
+ *   check    — { action: "check", selector: "#agree" }
+ *   uncheck  — { action: "uncheck", selector: "#agree" }
+ */
+async function runInteractions(page, steps) {
+  for (const step of steps) {
+    switch (step.action) {
+      case "click":
+        await page.click(step.selector, { timeout: 10000 });
+        break;
+      case "fill":
+        await page.fill(step.selector, step.value);
+        break;
+      case "select":
+        await page.selectOption(step.selector, step.value);
+        break;
+      case "type":
+        await page.type(step.selector, step.text);
+        break;
+      case "press":
+        await page.keyboard.press(step.key);
+        break;
+      case "wait":
+        await page.waitForTimeout(step.ms || 1000);
+        break;
+      case "hover":
+        await page.hover(step.selector, { timeout: 10000 });
+        break;
+      case "check":
+        await page.check(step.selector);
+        break;
+      case "uncheck":
+        await page.uncheck(step.selector);
+        break;
+      default:
+        console.error(`Unknown interaction action: ${step.action}`);
+    }
+    // Brief pause between interactions for page to settle
+    if (step.action !== "wait") {
+      await page.waitForTimeout(300);
+    }
+  }
+}
+
 async function main() {
   const browser = await chromium.launch({ headless });
   const page = await browser.newPage({
@@ -88,6 +146,24 @@ async function main() {
 
   // Always dismiss popups
   await dismissPopups(page);
+
+  // Run interactions if provided
+  if (interactJson) {
+    let steps;
+    try {
+      steps = JSON.parse(interactJson);
+    } catch (e) {
+      console.error(`Invalid --interact JSON: ${e.message}`);
+      await browser.close();
+      process.exit(1);
+    }
+    if (!Array.isArray(steps)) {
+      console.error("--interact must be a JSON array of steps");
+      await browser.close();
+      process.exit(1);
+    }
+    await runInteractions(page, steps);
+  }
 
   // Scroll if requested
   if (scrollTo > 0) {
